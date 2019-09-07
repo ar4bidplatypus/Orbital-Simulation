@@ -78,6 +78,7 @@ class Sat:
         self.att = _att
         self.updateSpinVector()	
         updateGravity(self)
+        self.last_pos = np.zeros((int(self.period()/10)*2, 3))
 
 ##end Sat##
 
@@ -88,7 +89,10 @@ class Planet:
 def spinEarth(_sat, dt):
 	R = np.sqrt(_sat.pos[0]**2 + _sat.pos[1]**2 + _sat.pos[2]**2) 
 	r = np.sqrt(_sat.pos[0]**2 + _sat.pos[1]**2) 
-	theta = m.atan(_sat.pos[0]/_sat.pos[1]) + 2*np.radians(0.0041780746219999996202)*dt 
+	if _sat.pos[1] != 0:
+		theta = m.atan(_sat.pos[0]/_sat.pos[1]) + 2*np.radians(0.0041780746219999996202)*dt 
+	else:
+		theta = 0
 	phi = m.asin(_sat.pos[2]/R)
 	#accel_r = accel*m.cos(phi)##accel_r is acceleration allong  r, where r is the vector projected onto the theta plane
 	if _sat.pos[0] > 0:
@@ -163,13 +167,13 @@ def stepTime(sat, total_time, dt):
 def setupGroundMap():
 	fig = plt.figure()
 	plt.ion()
-	ax = fig.add_subplot(1,1,1)
 	img = plt.imread('blue_marble_5400x2700.jpg')
-	ax.imshow(img, extent=[-180,180,-90,90])
-	track, = ax.plot([], [], 'y.', markersize=2)
-	return track, ax 
+	plt.imshow(img, extent=[-180,180,-90,90])
+	track, = plt.plot([], [], 'y.', markersize=0.5)
+	sat_marker, = plt.plot(0,0, 'r.', markersize=5)
+	return track, sat_marker 
 
-def updateGroundMap(_ground_track, _sat):
+def updateGroundMap(_ground_track, _sat_marker, _sat):
 	#convert x,y,z to long and lat
 	R = np.sqrt(_sat.last_pos[:,0]**2 + _sat.last_pos[:,1]**2 + _sat.last_pos[:,2]**2) 
 	theta = np.arctan2(_sat.last_pos[:,0],_sat.last_pos[:,1]) #long
@@ -178,27 +182,39 @@ def updateGroundMap(_ground_track, _sat):
 	phi = np.degrees(phi)
 	#now update and plot
 	_ground_track.set_data(theta,phi)
+	#find the long and lat point that's in the centre of all the data (this is where the sat is)
+	sat_phi = phi[int(_sat.period()/10)]
+	sat_theta = theta[int(_sat.period()/10)]
+	#now update and plot th sat's pos
+	_sat_marker.set_data(sat_theta,sat_phi)
 
-def simulate(sim_time, dt, sat, ground_track):
+def simulate(sim_time, dt, sat, ground_track, sat_marker):
 	elapsed_time = 0 
 	start_time = time.time()
 	step_start_time = start_time 
 	time_deviation = 0
+
+	for i in [0,1,2]:
+		sat.vel[i] = - sat.vel[i]
+	sat = stepTime(sat, int(sat.period()), 10)
+	for i in [0,1,2]:
+		sat.vel[i] = - sat.vel[i]
+	sat = stepTime(sat, int(sat.period())*2, 10)
 	while elapsed_time < sim_time:
 		##SIMULATION LOOP##
 		#step through time
 		sat = stepTime(sat, dt, dt)
 	
 		## create 2d map with track 
-		updateGroundMap(ground_track, sat)		
+		updateGroundMap(ground_track, sat_marker, sat)		
 		plt.pause(0.05)		
 		plt.draw()
 	
 		## create 3d globe with track 
 		mlab.clf()
 		scaling_factor = m.sqrt(400000**2/3)	
-		line = mlab.quiver3d(sat.last_pos[-1,1],sat.last_pos[-1,0],sat.last_pos[-1,2],sat.spin_vector[0],sat.spin_vector[1],sat.spin_vector[2], scale_factor=400000, line_width=2, figure=fig, color=(1,1,0), mode='2darrow')
-		mlab.points3d(6371*1000, 0, 0, figure = fig, scale_factor = 200000, color=(1,0,0))		
+		line = mlab.quiver3d(sat.last_pos[int(sat.period()/dt),1],sat.last_pos[int(sat.period()/dt),0],sat.last_pos[int(sat.period()/dt),2],sat.spin_vector[0],sat.spin_vector[1],sat.spin_vector[2], scale_factor=400000, line_width=2, figure=fig, color=(1,0,0), mode='2darrow')
+		mlab.points3d(6371*1000, 0, 0, figure = fig, scale_factor = 200000, color=(1,0,1))		
 		mlab.draw()
 		#make sure step only last one second in real time
 		if abs(time.time()-step_start_time) <= 1:
@@ -214,20 +230,20 @@ def simulate(sim_time, dt, sat, ground_track):
 	
 if __name__ == "__main__":
 	##SETUP##
-	sat = Sat(np.array([0,(-6771*1000),0]).astype(float), np.array([0,0,7000]).astype(float), np.array([0,0]).astype(float))#polar orbit is 8000m/s
-	ground_track, ax = setupGroundMap()
+	sat = Sat(np.array([0,(6771*1000),0]).astype(float), np.array([5000,0,5000]).astype(float), np.array([0,0]).astype(float))#polar orbit is 8000m/s
+	ground_track, sat_marker = setupGroundMap()
 	fig = mlab.figure(size = (600,600), bgcolor=(0,0,0))
 	image_file = 'blue_marble_5400x2700.jpg'
 	fig, sphere = createSphere(fig, image_file)
-
-	dt = 100 #for some reason this number can't be exactly one
+	sim_time = 50	
+	dt = 10 #for some reason this number can't be exactly one
 	period = int(sat.period())
 	earth_rotation_time = 24*60*60
 
 	sat.datt[1] = 2*m.pi/(sat.period())
-#	simulate(sim_time, dt, sat, ground_track)
-	sat = stepTime(sat, earth_rotation_time, dt)
-	updateGroundMap(ground_track, sat)
+	simulate(sim_time, dt, sat, ground_track, sat_marker)
+#	sat = stepTime(sat, earth_rotation_time, dt)
+	updateGroundMap(ground_track, sat_marker, sat)
 	longitude = 0
 	latitude = 0
 	plt.show()
