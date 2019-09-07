@@ -22,7 +22,10 @@ Gravity is currently calculated as if the earth were a point mass. This is suffi
     * Inclination, longitude of the ascending node, argument of the periapsis, eccentricity, semimajor axis, mean anomaly at epoch.
   
 -Add orientation planning algorithm
+
 -Simulate and/or save information about multiple orbiting objects
+
 -make time based off of user's current time so you could predict the ISS's orbit in real time for example
+
 -Update the gravity function so that the earth isn't a point mass (this should lead to orbital precession)
 
