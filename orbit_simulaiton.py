@@ -112,7 +112,7 @@ def updateGravity(_sat):
     ##calculate z accel
     phi = m.asin(_sat.pos[2]/R) 
     _sat.accel[2] = accel*m.sin(phi)
-    ##the following shit-show of an if else block calculate x and y accel given a bunch of different cases and quadrents
+    ##the following shit-show of an if else block calculate x and y accel given different cases and quadrents
     if _sat.pos[0] == 0 and _sat.pos[1] == 0:       ##for when we are directly over a pole
         _sat.accel[0] = 0
         _sat.accel[1] = 0
@@ -124,21 +124,6 @@ def updateGravity(_sat):
                 _sat.accel[0] = accel*m.cos(phi)
             else:
                 _sat.accel[0] = -accel*m.cos(phi) 
-        elif _sat.pos[0] == 0:                      ##this handles a polar orbit shifted 90 degrees from the one above                
-            phi = m.asin(_sat.pos[2]/R) 
-            _sat.accel[0] = 0
-            if _sat.pos[1] > 0:
-                _sat.accel[1] = accel*m.cos(phi)
-            else:
-                _sat.accel[1] = -accel*m.cos(phi)
-        elif _sat.pos[2] == 0:                      ##special case for when there is no inclination                  
-            theta = m.atan(_sat.pos[0]/_sat.pos[1]) ##theta phi and R are the traditional spherical coords
-            if _sat.pos[1] > 0: 
-                _sat.accel[0] = accel*m.sin(theta)
-                _sat.accel[1] = accel*m.cos(theta)
-            if _sat.pos[1] < 0:
-                _sat.accel[0] = -accel*m.sin(theta)
-                _sat.accel[1] = -accel*m.cos(theta)
         else:                                       ##general case
             theta = m.atan(_sat.pos[0]/_sat.pos[1])
             phi = m.asin(_sat.pos[2]/R)
@@ -149,7 +134,7 @@ def updateGravity(_sat):
                     _sat.accel[0] = -_sat.accel[0] 
             else:
                 _sat.accel[0] = -accel_r*m.sin(theta) 
-                if sat.pos[1] > 0:
+                if _sat.pos[1] > 0:
                     _sat.accel[0] = -_sat.accel[0] 
             if _sat.pos[1] > 0:
                 _sat.accel[1] = accel_r*m.cos(theta)
