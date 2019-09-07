@@ -1,5 +1,0 @@
-// Serial Write Header
-
-
-int doSerial(int); //the first int is the device, the second int is the speed value
-void setupSerial(void); //setup serial command
