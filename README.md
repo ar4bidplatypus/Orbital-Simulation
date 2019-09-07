@@ -13,13 +13,13 @@ Gravity is currently calculated as if the earth were a point mass. This is suffi
 ## TODO
 
 -Add user interface with the following:
-  *Button to start and stop sim
-  *View orbital description information
-  *View position and altitude information
-  *Allow the user to jump X number of seconds into the future or past
-  *Specify an orbit by one of the following and then reset the sim:
-    *3 elements of position and 3 element of velocity
-    *Inclination, longitude of the ascending node, argument of the periapsis, eccentricity, semimajor axis, mean anomaly at epoch.
+  * Button to start and stop sim
+  * View orbital description information
+  * View position and altitude information
+  * Allow the user to jump X number of seconds into the future or past
+  * Specify an orbit by one of the following and then reset the sim:
+    * 3 elements of position and 3 element of velocity
+    * Inclination, longitude of the ascending node, argument of the periapsis, eccentricity, semimajor axis, mean anomaly at epoch.
   
 -Add orientation planning algorithm
 -Simulate and/or save information about multiple orbiting objects
