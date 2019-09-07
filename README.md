@@ -1,6 +1,6 @@
-#Orbital Simulation
+# Orbital Simulation
 
-##Description
+## Description
 
 This is an orbital simulator written for QSET by Alex White.
 
@@ -10,7 +10,7 @@ Every second the simulation updates position, velocity and acceleration due to g
 
 Gravity is currently calculated as if the earth were a point mass. This is sufficient for now but should be updated later to allow for things like orbit precession. 
 
-##TODO
+## TODO
 
 -Add user interface with the following:
   *Button to start and stop sim
